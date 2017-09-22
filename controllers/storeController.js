@@ -18,3 +18,17 @@ exports.createStore = async (req, res) => {
   );
   res.redirect('/');
 };
+
+exports.getStores = async (req, res) => {
+  const stores = await Store.find();
+  res.render('stores', {
+    title: 'Stores',
+    stores
+  });
+};
+
+exports.editStore = async (req, res) => {
+  const storeId = req.params.id;
+  const store = await Store.findById(storeId);
+  res.render('editStore', { title: 'Edit Store', store });
+};
