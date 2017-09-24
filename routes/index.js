@@ -3,39 +3,51 @@ const router = express.Router();
 const storeController = require('../controllers/storeController');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
-const { catchErrors } = require('../handlers/errorHandlers');
+const { catchE } = require('../handlers/errorHandlers');
 
-// Do work here
-router.get('/', catchErrors(storeController.getStores));
-router.get('/add', storeController.addStore);
-router.get('/stores', catchErrors(storeController.getStores));
+/*
+ * store routes
+*/
+router.get('/', catchE(storeController.getStores));
+router.get('/add', authController.isLoggedIn, storeController.addStore);
+router.get('/stores', catchE(storeController.getStores));
 router.post(
   '/add',
+  authController.isLoggedIn,
   storeController.upload,
-  catchErrors(storeController.resize),
-  catchErrors(storeController.createStore)
+  catchE(storeController.resize),
+  catchE(storeController.createStore)
 );
 router.post(
   '/add/:id',
+  authController.isLoggedIn,
   storeController.upload,
-  catchErrors(storeController.resize),
-  catchErrors(storeController.updateStore)
+  catchE(storeController.resize),
+  catchE(storeController.updateStore)
 );
-router.get('/stores/:id/edit', catchErrors(storeController.editStore));
-router.get('/store/:slug', catchErrors(storeController.getStoreBySlug));
+router.get(
+  '/stores/:id/edit',
+  authController.isLoggedIn,
+  catchE(storeController.editStore)
+);
+router.get('/store/:slug', catchE(storeController.getStoreBySlug));
 
-router.get('/tags', catchErrors(storeController.getStoresByTag));
-router.get('/tags/:tag', catchErrors(storeController.getStoresByTag));
+router.get('/tags', catchE(storeController.getStoresByTag));
+router.get('/tags/:tag', catchE(storeController.getStoresByTag));
 
+// User routes
 router.get('/login', userController.loginForm);
 router.post('/login', authController.login);
 router.get('/register', userController.registerForm);
 router.post(
   '/register',
   userController.validateRegister,
-  catchErrors(userController.register),
+  catchE(userController.register),
   authController.login
 );
 router.get('/logout', authController.logout);
+router.get('/account', userController.account);
+router.post('/account', userController.updateAccount);
+router.post('/account/forgot', authController.forgot);
 
 module.exports = router;
