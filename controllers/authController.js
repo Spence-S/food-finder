@@ -34,6 +34,22 @@ exports.forgot = async (req, res) => {
   await user.save();
   // 3) Send them email with a token
   const resetURL = `http://${req.headers
-    .host}.account/reset/${user.resetPasswordToken}`;
+    .host}/account/reset/${user.resetPasswordToken}`;
   // 4) redirect to login page after email has been sent
+  req.flash(
+    'success',
+    'You have been emailed a password reset link. ' + resetURL
+  );
+  res.redirect('/login');
+};
+
+exports.reset = async (req, res, next) => {
+  const user = await User.findOne({
+    resetPasswordToken: req.params.token,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+  if (!user) {
+    req.flash('error', 'password reset token is invalid or has expired.');
+    return res.redirect('/login');
+  }
 };
